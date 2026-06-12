@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — PathForge AI{% endblock %}
+{% block content %}
+<div class="page-wrap">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-sub">Welcome back, <strong>{{ current_user.username }}</strong> 👋</p>
+    </div>
+    <a href="{{ url_for('generate') }}" class="btn-primary-action">
+      <i class="ti ti-sparkles"></i> New Roadmap
+    </a>
+  </div>
+
+  <!-- Stats row -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#EEEDFE;color:#3C3489"><i class="ti ti-route"></i></div>
+      <div class="stat-body">
+        <div class="stat-value">{{ total_roadmaps }}</div>
+        <div class="stat-label">Roadmaps Generated</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#E1F5EE;color:#085041"><i class="ti ti-circle-check"></i></div>
+      <div class="stat-body">
+        <div class="stat-value">{{ completed_skills }}</div>
+        <div class="stat-label">Skills Completed</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#FAEEDA;color:#633806"><i class="ti ti-chart-pie"></i></div>
+      <div class="stat-body">
+        <div class="stat-value">{{ overall_pct }}%</div>
+        <div class="stat-label">Overall Progress</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#FAE7E7;color:#7C1F1F"><i class="ti ti-layers"></i></div>
+      <div class="stat-body">
+        <div class="stat-value">{{ total_skills }}</div>
+        <div class="stat-label">Total Skills</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-grid">
+
+    <!-- Active roadmap -->
+    <div class="dash-main">
+      <div class="section-head">
+        <h2 class="section-title">Active Roadmap</h2>
+        <a href="{{ url_for('history') }}" class="section-link">View all →</a>
+      </div>
+
+      {% if active_roadmap %}
+      <div class="active-card">
+        <div class="active-card-header">
+          <div>
+            <div class="active-goal">{{ active_roadmap.goal }}</div>
+            <div class="active-meta">
+              {{ active_roadmap.level }} &nbsp;·&nbsp;
+              {{ active_roadmap.duration }} &nbsp;·&nbsp;
+              {{ active_roadmap.hours_per_day }} hrs/day
+            </div>
+          </div>
+          <div class="active-badges">
+            <span class="badge badge-{{ active_roadmap.level | lower }}">{{ active_roadmap.level }}</span>
+            {% if active_roadmap.source == 'ai' %}
+              <span class="badge badge-ai">✦ AI</span>
+            {% else %}
+              <span class="badge badge-manual">Curated</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Progress bar -->
+        {% set prog = namespace(done=0, total=0) %}
+        {% for p in active_roadmap.progress %}
+          {% set prog.total = prog.total + 1 %}
+          {% if p.completed %}{% set prog.done = prog.done + 1 %}{% endif %}
+        {% endfor %}
+        {% set pct = ((prog.done / prog.total * 100) | round | int) if prog.total > 0 else 0 %}
+
+        <div class="prog-label">
+          <span>Progress</span><span>{{ prog.done }} / {{ prog.total }} skills</span>
+        </div>
+        <div class="prog-track">
+          <div class="prog-fill" style="width:{{ pct }}%"></div>
+        </div>
+        <div class="prog-pct">{{ pct }}%</div>
+
+        <div class="active-actions">
+          <a href="{{ url_for('roadmap', roadmap_id=active_roadmap.id) }}" class="btn-resume">
+            <i class="ti ti-player-play"></i> Resume Learning
+          </a>
+          <a href="{{ url_for('download_pdf', roadmap_id=active_roadmap.id) }}" class="btn-ghost-sm">
+            <i class="ti ti-file-download"></i> PDF
+          </a>
+        </div>
+      </div>
+
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">🗺️</div>
+        <div class="empty-title">No active roadmap yet</div>
+        <div class="empty-sub">Generate your first career roadmap to get started.</div>
+        <a href="{{ url_for('generate') }}" class="btn-primary-action" style="margin-top:1rem">
+          <i class="ti ti-sparkles"></i> Generate Roadmap
+        </a>
+      </div>
+      {% endif %}
+
+      <!-- Recent history -->
+      <div class="section-head" style="margin-top:1.5rem">
+        <h2 class="section-title">Recent Roadmaps</h2>
+      </div>
+
+      {% if history %}
+        {% for h in history[:4] %}
+        <a href="{{ url_for('roadmap', roadmap_id=h.id) }}" class="history-row">
+          <div class="hr-icon">
+            {% if 'frontend' in h.goal|lower %}🎨
+            {% elif 'backend' in h.goal|lower %}⚙️
+            {% elif 'full' in h.goal|lower %}🔗
+            {% elif 'ai' in h.goal|lower or 'ml' in h.goal|lower %}🤖
+            {% elif 'data' in h.goal|lower %}📊
+            {% elif 'cyber' in h.goal|lower or 'security' in h.goal|lower %}🔐
+            {% elif 'devops' in h.goal|lower %}🚢
+            {% elif 'mobile' in h.goal|lower %}📱
+            {% elif 'blockchain' in h.goal|lower %}⛓️
+            {% elif 'game' in h.goal|lower %}🎮
+            {% else %}🧭{% endif %}
+          </div>
+          <div class="hr-info">
+            <div class="hr-goal">{{ h.goal }}</div>
+            <div class="hr-meta">{{ h.level }} · {{ h.created_at.strftime('%d %b %Y') }}</div>
+          </div>
+          <div class="hr-status">
+            <span class="status-dot status-{{ h.status }}"></span>
+            {{ h.status | capitalize }}
+          </div>
+          <i class="ti ti-chevron-right hr-arrow"></i>
+        </a>
+        {% endfor %}
+      {% else %}
+        <p class="muted-text">No roadmaps generated yet.</p>
+      {% endif %}
+    </div>
+
+    <!-- Sidebar: chart + tips -->
+    <div class="dash-side">
+
+      <!-- Doughnut chart -->
+      <div class="chart-card">
+        <div class="section-title" style="margin-bottom:1rem">Progress Overview</div>
+        <div class="chart-wrap">
+          <canvas id="progressChart" width="180" height="180"></canvas>
+          <div class="chart-center-label">
+            <div class="chart-pct">{{ overall_pct }}%</div>
+            <div class="chart-sub">complete</div>
+          </div>
+        </div>
+        <div class="chart-legend">
+          <div class="cl-item"><span class="cl-dot" style="background:#7F77DD"></span>Completed ({{ completed_skills }})</div>
+          <div class="cl-item"><span class="cl-dot" style="background:#E5E7EB"></span>Remaining ({{ total_skills - completed_skills }})</div>
+        </div>
+      </div>
+
+      <!-- Tips card -->
+      <div class="tips-card">
+        <div class="tips-title">💡 Quick Tips</div>
+        <ul class="tips-list">
+          <li>Complete at least one skill task daily to build momentum.</li>
+          <li>Download your roadmap as PDF to study offline.</li>
+          <li>Try a custom career like "AR/VR Developer" — the AI handles it!</li>
+          <li>Use Beginner level even if you know some basics — review is valuable.</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% block extra_scripts %}
+<script>
+  const ctx = document.getElementById('progressChart');
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        datasets: [{
+          data: [{{ completed_skills }}, {{ total_skills - completed_skills }}],
+          backgroundColor: ['#7F77DD', '#E5E7EB'],
+          borderWidth: 0,
+          hoverOffset: 4,
+        }]
+      },
+      options: {
+        cutout: '72%',
+        plugins: { legend: { display: false }, tooltip: { enabled: true } },
+        animation: { duration: 800, easing: 'easeInOutQuart' },
+      }
+    });
+  }
+</script>
+{% endblock %}
+{% endblock %}

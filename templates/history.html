@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}History — PathForge AI{% endblock %}
+{% block content %}
+<div class="page-wrap">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Roadmap History</h1>
+      <p class="page-sub">All your generated roadmaps in one place</p>
+    </div>
+    <a href="{{ url_for('generate') }}" class="btn-primary-action">
+      <i class="ti ti-sparkles"></i> New Roadmap
+    </a>
+  </div>
+
+  {% if entries %}
+  <div class="history-list">
+    {% for item in entries %}
+    {% set e = item.entry %}
+    <div class="history-card status-border-{{ e.status }}">
+      <div class="hc-left">
+        <div class="hc-emoji">
+          {% if 'frontend' in e.goal|lower %}🎨
+          {% elif 'backend' in e.goal|lower %}⚙️
+          {% elif 'full' in e.goal|lower %}🔗
+          {% elif 'ai' in e.goal|lower or 'ml' in e.goal|lower %}🤖
+          {% elif 'data' in e.goal|lower %}📊
+          {% elif 'cyber' in e.goal|lower or 'security' in e.goal|lower %}🔐
+          {% elif 'devops' in e.goal|lower %}🚢
+          {% elif 'mobile' in e.goal|lower %}📱
+          {% elif 'blockchain' in e.goal|lower %}⛓️
+          {% elif 'game' in e.goal|lower %}🎮
+          {% else %}🧭{% endif %}
+        </div>
+        <div class="hc-info">
+          <div class="hc-goal">{{ e.goal }}</div>
+          <div class="hc-meta">
+            <span class="badge badge-{{ e.level | lower }}">{{ e.level }}</span>
+            <span class="meta-chip"><i class="ti ti-clock"></i> {{ e.duration }}</span>
+            <span class="meta-chip"><i class="ti ti-sun"></i> {{ e.hours_per_day }} hrs/day</span>
+            {% if e.source in ['ai', 'ai_cached'] %}
+              <span class="badge badge-ai">✦ AI</span>
+            {% else %}
+              <span class="badge badge-manual">Curated</span>
+            {% endif %}
+          </div>
+          <div class="hc-date">Created {{ e.created_at.strftime('%d %b %Y') }}</div>
+        </div>
+      </div>
+
+      <div class="hc-progress">
+        <div class="hc-pct">{{ item.pct }}%</div>
+        <div class="hc-track">
+          <div class="hc-fill {% if item.pct == 100 %}fill-complete{% endif %}"
+               style="width:{{ item.pct }}%"></div>
+        </div>
+        <div class="hc-counts">{{ item.done }} / {{ item.total }} skills</div>
+      </div>
+
+      <div class="hc-status">
+        <span class="status-pill status-{{ e.status }}">
+          {% if e.status == 'completed' %}✓ Completed
+          {% elif e.status == 'active' %}▶ Active
+          {% else %}⏸ Paused{% endif %}
+        </span>
+      </div>
+
+      <div class="hc-actions">
+        <a href="{{ url_for('roadmap', roadmap_id=e.id) }}"
+           class="btn-resume {% if e.status == 'completed' %}btn-review{% endif %}">
+          <i class="ti ti-{% if e.status == 'completed' %}eye{% else %}player-play{% endif %}"></i>
+          {{ 'Review' if e.status == 'completed' else 'Resume' }}
+        </a>
+        <a href="{{ url_for('download_pdf', roadmap_id=e.id) }}" class="btn-ghost-sm" title="Download PDF">
+          <i class="ti ti-file-download"></i>
+        </a>
+        <form action="{{ url_for('delete_roadmap', roadmap_id=e.id) }}" method="POST"
+              onsubmit="return confirm('Delete this roadmap? This cannot be undone.')">
+          <button type="submit" class="btn-danger-sm" title="Delete">
+            <i class="ti ti-trash"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="empty-state" style="margin-top:3rem">
+    <div class="empty-icon">📭</div>
+    <div class="empty-title">No roadmaps yet</div>
+    <div class="empty-sub">Generate your first career roadmap to see it here.</div>
+    <a href="{{ url_for('generate') }}" class="btn-primary-action" style="margin-top:1.2rem">
+      <i class="ti ti-sparkles"></i> Generate Now
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

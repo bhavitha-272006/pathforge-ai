@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Login — PathForge AI{% endblock %}
+{% block guest_content %}
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-icon">🔑</div>
+      <h1>Welcome back</h1>
+      <p>Log in to continue your learning journey</p>
+    </div>
+
+    <form action="{{ url_for('login') }}" method="POST" class="auth-form">
+      <div class="form-group">
+        <label for="email">Email address</label>
+        <div class="input-wrap">
+          <i class="ti ti-mail"></i>
+          <input type="email" id="email" name="email" class="form-control" placeholder="you@example.com" required autocomplete="email"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <i class="ti ti-lock"></i>
+          <input type="password" id="password" name="password" class="form-control" placeholder="Your password" required autocomplete="current-password"/>
+          <button type="button" class="eye-btn" onclick="togglePass('password',this)">
+            <i class="ti ti-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-auth">Login →</button>
+    </form>
+
+    <p class="auth-switch">
+      Don't have an account? <a href="{{ url_for('signup') }}">Sign up free</a>
+    </p>
+  </div>
+
+  <div class="auth-visual">
+    <div class="av-content">
+      <div class="av-badge">✦ PathForge AI</div>
+      <h2>Resume from where you left off</h2>
+      <p>Your progress, roadmaps and achievements are saved automatically.</p>
+      <div class="av-stats">
+        <div class="av-stat"><span>10+</span>Career tracks</div>
+        <div class="av-stat"><span>3</span>Difficulty levels</div>
+        <div class="av-stat"><span>Free</span>Forever</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

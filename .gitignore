@@ -1,0 +1,30 @@
+# ── Secrets — NEVER push these ──
+.env
+
+# ── Database ──
+database.db
+*.db
+instance/
+
+# ── Python ──
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+
+# ── IDE ──
+.vscode/
+.idea/
+*.swp
+
+# ── OS files ──
+.DS_Store
+Thumbs.db
+
+# ── Logs ──
+*.log

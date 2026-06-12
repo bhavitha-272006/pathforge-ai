@@ -1,0 +1,403 @@
+<!-- templates/generate.html -->
+<!-- Drop-in replacement for your existing generate.html -->
+<!-- Extends your base.html and uses your existing Flask form action -->
+
+{% extends "base.html" %}
+
+{% block title %}Generate Roadmap — PathForge AI{% endblock %}
+
+{% block content %}
+<style>
+  /* ── Page layout ── */
+  .gen-page {
+    max-width: 720px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  .gen-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .gen-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 0.4rem;
+  }
+
+  .gen-header p {
+    color: var(--text-muted, #666);
+    font-size: 1rem;
+  }
+
+  .source-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #EEEDFE;
+    color: #3C3489;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 1rem;
+  }
+
+  /* ── Form card ── */
+  .gen-card {
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary, #111);
+  }
+
+  .form-group label .hint {
+    font-weight: 400;
+    color: var(--text-muted, #888);
+    font-size: 0.8rem;
+    margin-left: 4px;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 0.65rem 0.9rem;
+    border: 1px solid var(--border-color, #d1d5db);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    background: var(--input-bg, #fff);
+    color: var(--text-primary, #111);
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+  }
+
+  .form-control:focus {
+    outline: none;
+    border-color: #7F77DD;
+    box-shadow: 0 0 0 3px rgba(127,119,221,0.15);
+  }
+
+  /* ── Career chips ── */
+  .career-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .chip {
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color, #d1d5db);
+    background: var(--chip-bg, #f9fafb);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text-primary, #333);
+    user-select: none;
+  }
+
+  .chip:hover {
+    border-color: #7F77DD;
+    color: #3C3489;
+    background: #EEEDFE;
+  }
+
+  .chip.active {
+    background: #7F77DD;
+    border-color: #7F77DD;
+    color: white;
+  }
+
+  /* ── Level cards ── */
+  .level-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .level-card {
+    border: 2px solid var(--border-color, #e5e7eb);
+    border-radius: 12px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    background: var(--card-bg, #fff);
+    user-select: none;
+  }
+
+  .level-card:hover {
+    border-color: #AFA9EC;
+    background: #FAFAFE;
+  }
+
+  .level-card.selected {
+    border-color: #7F77DD;
+    background: #EEEDFE;
+  }
+
+  .level-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .level-icon {
+    font-size: 1.5rem;
+    margin-bottom: 6px;
+  }
+
+  .level-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-primary, #111);
+    margin-bottom: 4px;
+  }
+
+  .level-desc {
+    font-size: 0.75rem;
+    color: var(--text-muted, #666);
+    line-height: 1.4;
+  }
+
+  .level-tag {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+
+  .tag-green  { background: #EAF3DE; color: #27500A; }
+  .tag-purple { background: #EEEDFE; color: #3C3489; }
+  .tag-coral  { background: #FAECE7; color: #712B13; }
+
+  /* ── Slider row ── */
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .slider-row input[type="range"] {
+    flex: 1;
+    accent-color: #7F77DD;
+  }
+
+  .slider-val {
+    min-width: 70px;
+    text-align: right;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #3C3489;
+  }
+
+  /* ── Submit button ── */
+  .btn-generate {
+    width: 100%;
+    padding: 0.85rem;
+    background: #7F77DD;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 0.5rem;
+  }
+
+  .btn-generate:hover { background: #534AB7; }
+  .btn-generate:active { transform: scale(0.99); }
+
+  /* ── AI notice ── */
+  .ai-notice {
+    margin-top: 1rem;
+    padding: 10px 14px;
+    background: #F1EFE8;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    color: #5F5E5A;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.5;
+  }
+
+  /* Dark mode support */
+  @media (prefers-color-scheme: dark) {
+    .gen-card { background: #1e1e2e; border-color: #333; }
+    .form-control { background: #2a2a3e; border-color: #444; color: #eee; }
+    .chip { background: #2a2a3e; border-color: #444; color: #ccc; }
+    .level-card { background: #1e1e2e; border-color: #444; }
+    .level-card.selected { background: #26215C; border-color: #7F77DD; }
+    .ai-notice { background: #2a2a3e; color: #aaa; }
+  }
+</style>
+
+<div class="gen-page">
+
+  <div class="gen-header">
+    <div class="source-badge">✦ Hybrid AI Engine</div>
+    <h1>Generate Your Roadmap</h1>
+    <p>Choose a career and level — we'll build your personalized learning path instantly.</p>
+  </div>
+
+  <div class="gen-card">
+    <form action="/generate" method="POST">
+
+      <!-- Career Goal -->
+      <div class="form-group">
+        <label for="goal">
+          Career goal
+          <span class="hint">— pick one below or type your own</span>
+        </label>
+        <input
+          type="text"
+          id="goal"
+          name="goal"
+          class="form-control"
+          placeholder="e.g. Frontend Developer, AR/VR Developer..."
+          required
+          autocomplete="off"
+        />
+        <!-- Quick-select chips for the 10 manual careers -->
+        <div class="career-chips" id="chips">
+          <span class="chip" data-val="Frontend Developer">Frontend</span>
+          <span class="chip" data-val="Backend Developer">Backend</span>
+          <span class="chip" data-val="Full Stack Developer">Full Stack</span>
+          <span class="chip" data-val="AI Engineer">AI Engineer</span>
+          <span class="chip" data-val="Machine Learning Engineer">ML Engineer</span>
+          <span class="chip" data-val="Data Scientist">Data Scientist</span>
+          <span class="chip" data-val="Cyber Security Engineer">Cyber Security</span>
+          <span class="chip" data-val="DevOps Engineer">DevOps</span>
+          <span class="chip" data-val="Mobile Developer">Mobile Dev</span>
+          <span class="chip" data-val="Blockchain Developer">Blockchain</span>
+          <span class="chip" data-val="Game Developer">Game Dev</span>
+        </div>
+      </div>
+
+      <!-- Level selection -->
+      <div class="form-group">
+        <label>Your current level</label>
+        <div class="level-cards">
+
+          <label class="level-card selected" id="card-beginner">
+            <input type="radio" name="level" value="beginner" checked onchange="selectLevel('beginner')"/>
+            <div class="level-icon">🌱</div>
+            <div class="level-name">Beginner</div>
+            <div class="level-desc">No prior experience. Start from zero with step-by-step guidance.</div>
+            <span class="level-tag tag-green">Recommended to start</span>
+          </label>
+
+          <label class="level-card" id="card-intermediate">
+            <input type="radio" name="level" value="intermediate" onchange="selectLevel('intermediate')"/>
+            <div class="level-icon">🚀</div>
+            <div class="level-name">Intermediate</div>
+            <div class="level-desc">You know the basics. Ready to build real projects and go deeper.</div>
+            <span class="level-tag tag-purple">Build real projects</span>
+          </label>
+
+          <label class="level-card" id="card-advanced">
+            <input type="radio" name="level" value="advanced" onchange="selectLevel('advanced')"/>
+            <div class="level-icon">⚡</div>
+            <div class="level-name">Advanced</div>
+            <div class="level-desc">Strong foundation. Time for architecture, systems, and expertise.</div>
+            <span class="level-tag tag-coral">Expert path</span>
+          </label>
+
+        </div>
+      </div>
+
+      <!-- Duration -->
+      <div class="form-group">
+        <label>Duration</label>
+        <div class="slider-row">
+          <input
+            type="range"
+            name="duration"
+            id="duration-slider"
+            min="1" max="12" step="1" value="3"
+            oninput="document.getElementById('dur-val').textContent = this.value + ' month' + (this.value > 1 ? 's' : '')"
+          />
+          <span class="slider-val" id="dur-val">3 months</span>
+        </div>
+      </div>
+
+      <!-- Daily hours -->
+      <div class="form-group">
+        <label>Daily study hours</label>
+        <div class="slider-row">
+          <input
+            type="range"
+            name="hours_per_day"
+            id="hours-slider"
+            min="1" max="8" step="1" value="2"
+            oninput="document.getElementById('hours-val').textContent = this.value + ' hr' + (this.value > 1 ? 's' : '') + ' / day'"
+          />
+          <span class="slider-val" id="hours-val">2 hrs / day</span>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-generate">
+        ✦ Generate My Roadmap
+      </button>
+
+      <div class="ai-notice">
+        💡 <span>
+          <strong>10 careers</strong> use curated expert roadmaps (instant).
+          Any other career — like <em>AR/VR Developer</em> or <em>Quantum Computing</em> — is
+          generated by AI using Groq (Llama 3). Both use the same format.
+        </span>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<script>
+  // ── Chip click → fill input ──
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.getElementById('goal').value = chip.dataset.val;
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+    });
+  });
+
+  // ── Clear chip highlight on manual type ──
+  document.getElementById('goal').addEventListener('input', () => {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  });
+
+  // ── Level card visual toggle ──
+  function selectLevel(level) {
+    ['beginner', 'intermediate', 'advanced'].forEach(l => {
+      document.getElementById('card-' + l).classList.remove('selected');
+    });
+    document.getElementById('card-' + level).classList.add('selected');
+  }
+</script>
+{% endblock %}

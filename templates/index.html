@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}PathForge AI — Build Your Career Roadmap{% endblock %}
+{% block guest_content %}
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">✦ Hybrid AI Engine — Always Free</div>
+    <h1 class="hero-title">Build Your Personalized<br/><span class="hero-accent">Career Roadmap</span></h1>
+    <p class="hero-sub">
+      10 curated expert roadmaps + AI generation for any other career.
+      Track your skills, stay consistent, reach your goal.
+    </p>
+    <div class="hero-actions">
+      <a href="{{ url_for('signup') }}" class="btn-hero-primary">Get Started Free →</a>
+      <a href="{{ url_for('login') }}" class="btn-hero-ghost">I have an account</a>
+    </div>
+  </div>
+
+  <div class="hero-cards">
+    <div class="hero-card hc-1">
+      <div class="hc-icon">🎯</div>
+      <div class="hc-title">10 Curated Careers</div>
+      <div class="hc-sub">Expert-designed skill trees for the most popular paths</div>
+    </div>
+    <div class="hero-card hc-2">
+      <div class="hc-icon">✦</div>
+      <div class="hc-title">AI for Any Career</div>
+      <div class="hc-sub">Type anything — Groq AI generates a roadmap instantly</div>
+    </div>
+    <div class="hero-card hc-3">
+      <div class="hc-icon">📈</div>
+      <div class="hc-title">Track Progress</div>
+      <div class="hc-sub">Checkboxes, progress bars and dashboard analytics</div>
+    </div>
+    <div class="hero-card hc-4">
+      <div class="hc-icon">📄</div>
+      <div class="hc-title">PDF Export</div>
+      <div class="hc-sub">Download your roadmap as a clean, shareable PDF</div>
+    </div>
+  </div>
+</section>
+
+<section class="levels-section">
+  <h2>Three levels for every student</h2>
+  <p class="levels-sub">Whether you're just starting or already building projects — there's a level for you.</p>
+  <div class="levels-grid">
+    <div class="level-preview">
+      <div class="lp-icon">🌱</div>
+      <div class="lp-name">Beginner</div>
+      <div class="lp-desc">Start from zero. Clear steps, free resources, beginner-friendly tasks.</div>
+      <div class="lp-tag tag-green">Perfect for students</div>
+    </div>
+    <div class="level-preview lp-featured">
+      <div class="lp-icon">🚀</div>
+      <div class="lp-name">Intermediate</div>
+      <div class="lp-desc">You know the basics. Build real projects and go deeper into the stack.</div>
+      <div class="lp-tag tag-purple">Most popular</div>
+    </div>
+    <div class="level-preview">
+      <div class="lp-icon">⚡</div>
+      <div class="lp-name">Advanced</div>
+      <div class="lp-desc">Architecture, systems design, research, and expert-level skills.</div>
+      <div class="lp-tag tag-coral">Expert path</div>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:2rem">
+    <a href="{{ url_for('signup') }}" class="btn-hero-primary">Start Building Your Roadmap →</a>
+  </div>
+</section>
+{% endblock %}

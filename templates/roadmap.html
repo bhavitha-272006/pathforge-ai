@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% block title %}{{ roadmap.goal }} Roadmap — PathForge AI{% endblock %}
+{% block content %}
+<div class="page-wrap">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <div class="breadcrumb">
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <i class="ti ti-chevron-right"></i>
+        <span>{{ roadmap.goal }}</span>
+      </div>
+      <h1 class="page-title">{{ roadmap.goal }}</h1>
+      <div class="roadmap-meta-row">
+        <span class="badge badge-{{ roadmap.level | lower }}">{{ roadmap.level }}</span>
+        <span class="meta-chip"><i class="ti ti-clock"></i> {{ roadmap.duration }}</span>
+        <span class="meta-chip"><i class="ti ti-sun"></i> {{ roadmap.hours_per_day }} hrs/day</span>
+        {% if roadmap.source in ['ai', 'ai_cached'] %}
+          <span class="badge badge-ai">✦ AI Generated</span>
+        {% else %}
+          <span class="badge badge-manual">✓ Curated</span>
+        {% endif %}
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a href="{{ url_for('send_email', roadmap_id=roadmap_id) }}" class="btn-ghost-sm">
+        <i class="ti ti-mail"></i> Email PDF
+      </a>
+      <a href="{{ url_for('download_pdf', roadmap_id=roadmap_id) }}" class="btn-ghost-sm">
+        <i class="ti ti-file-download"></i> Export PDF
+      </a>
+      <a href="{{ url_for('generate') }}" class="btn-primary-action">
+        <i class="ti ti-sparkles"></i> New Roadmap
+      </a>
+    </div>
+  </div>
+
+  <!-- Overall progress bar -->
+  <div class="overall-progress-card">
+    <div class="op-left">
+      <div class="op-title">Overall Progress</div>
+      <div class="op-stats">{{ completed }} of {{ total }} skills completed</div>
+    </div>
+    <div class="op-right">
+      <div class="op-pct" id="overall-pct">{{ pct }}%</div>
+    </div>
+    <div class="op-bar-wrap">
+      <div class="op-bar-track">
+        <div class="op-bar-fill" id="overall-bar" style="width:{{ pct }}%"></div>
+      </div>
+    </div>
+    <div class="op-counts">
+      <span id="done-count">{{ completed }}</span> / <span id="total-count">{{ total }}</span> skills
+    </div>
+  </div>
+
+  <!-- Skills grid -->
+  <div class="skills-section">
+    <div class="section-head">
+      <h2 class="section-title">Skills & Topics</h2>
+      <span class="section-link" style="font-size:0.8rem;cursor:default">Click a skill card to expand</span>
+    </div>
+
+    <div class="skills-grid">
+      {% for skill in roadmap.skills %}
+      {% set is_done = progress_map.get(skill.name, False) %}
+      <div class="skill-card {% if is_done %}skill-done{% endif %}" id="skill-{{ loop.index }}">
+
+        <!-- Card header -->
+        <div class="sc-header" onclick="toggleSkill({{ loop.index }})">
+          <div class="sc-left">
+            <div class="sc-checkbox">
+              <input
+                type="checkbox"
+                id="cb-{{ loop.index }}"
+                {% if is_done %}checked{% endif %}
+                onclick="event.stopPropagation(); saveProgress('{{ skill.name }}', {{ roadmap_id }}, this)"
+              />
+              <label for="cb-{{ loop.index }}" class="cb-label"></label>
+            </div>
+            <div class="sc-info">
+              <div class="sc-name">{{ skill.name }}</div>
+              <div class="sc-meta">{{ skill.duration }} · {{ skill.topics | length }} topics</div>
+            </div>
+          </div>
+          <div class="sc-right">
+            {% if is_done %}
+              <span class="sc-done-badge"><i class="ti ti-check"></i> Done</span>
+            {% endif %}
+            <i class="ti ti-chevron-down sc-chevron" id="chev-{{ loop.index }}"></i>
+          </div>
+        </div>
+
+        <!-- Expandable body -->
+        <div class="sc-body" id="body-{{ loop.index }}" style="display:none">
+
+          <!-- Topics -->
+          <div class="sc-section-label">📚 Topics</div>
+          <div class="sc-topics">
+            {% for topic in skill.topics %}
+            <span class="topic-chip">{{ topic }}</span>
+            {% endfor %}
+          </div>
+
+          <!-- Tasks -->
+          {% if skill.tasks %}
+          <div class="sc-section-label" style="margin-top:10px">✅ Hands-on Tasks</div>
+          <ul class="sc-tasks">
+            {% for task in skill.tasks %}
+            <li><i class="ti ti-arrow-right"></i> {{ task }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+
+          <!-- Resources -->
+          {% if skill.resources %}
+          <div class="sc-section-label" style="margin-top:10px">🔗 Free Resources</div>
+          <div class="sc-resources">
+            {% for res in skill.resources %}
+            <a href="{{ res.url }}" target="_blank" rel="noopener noreferrer" class="resource-link">
+              <i class="ti ti-external-link"></i> {{ res.title }}
+            </a>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+<!-- Confetti (fires when 100%) -->
+<div id="complete-banner" class="complete-banner" style="display:none">
+  🎉 Roadmap Complete! You crushed it!
+</div>
+
+{% block extra_scripts %}
+<script>
+  const ROADMAP_ID = {{ roadmap_id }};
+
+  // ── Toggle skill card open/close ──
+  function toggleSkill(idx) {
+    const body  = document.getElementById('body-' + idx);
+    const chev  = document.getElementById('chev-' + idx);
+    const open  = body.style.display === 'block';
+    body.style.display = open ? 'none' : 'block';
+    chev.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+  }
+
+  // ── Save progress via AJAX ──
+  function saveProgress(skillName, roadmapId, checkbox) {
+    const card = checkbox.closest('.skill-card');
+    fetch('/save_progress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        skill_name: skillName,
+        roadmap_id: roadmapId,
+        completed: checkbox.checked
+      })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (!data.success) return;
+
+      // Update card appearance
+      if (checkbox.checked) {
+        card.classList.add('skill-done');
+        let badge = card.querySelector('.sc-done-badge');
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'sc-done-badge';
+          badge.innerHTML = '<i class="ti ti-check"></i> Done';
+          card.querySelector('.sc-right').prepend(badge);
+        }
+      } else {
+        card.classList.remove('skill-done');
+        const badge = card.querySelector('.sc-done-badge');
+        if (badge) badge.remove();
+      }
+
+      // Update overall progress UI
+      document.getElementById('overall-pct').textContent   = data.pct + '%';
+      document.getElementById('overall-bar').style.width   = data.pct + '%';
+      document.getElementById('done-count').textContent    = data.done;
+      document.getElementById('total-count').textContent   = data.total;
+
+      // Confetti at 100%
+      if (data.pct === 100) {
+        document.getElementById('complete-banner').style.display = 'block';
+        confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
+        setTimeout(() => confetti({ particleCount: 100, spread: 60, origin: { y: 0.5 } }), 600);
+      }
+    });
+  }
+
+  // ── Auto-open first incomplete skill ──
+  document.addEventListener('DOMContentLoaded', () => {
+    const cards = document.querySelectorAll('.skill-card:not(.skill-done)');
+    if (cards.length) {
+      const idx = cards[0].id.split('-')[1];
+      toggleSkill(idx);
+    }
+  });
+</script>
+{% endblock %}
+{% endblock %}

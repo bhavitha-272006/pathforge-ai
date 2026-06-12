@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block title %}AI Cache Admin — PathForge AI{% endblock %}
+{% block content %}
+<div class="page-wrap">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">AI Roadmap Cache</h1>
+      <p class="page-sub">Every AI-generated roadmap is stored here and reused for future students — no repeat API calls.</p>
+    </div>
+    <a href="{{ url_for('dashboard') }}" class="btn-ghost-sm">
+      <i class="ti ti-arrow-left"></i> Back to Dashboard
+    </a>
+  </div>
+
+  <!-- Stats row -->
+  <div class="stats-grid" style="margin-bottom:24px">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#EEEDFE;color:#3C3489"><i class="ti ti-database"></i></div>
+      <div class="stat-body">
+        <div class="stat-value">{{ total_cached }}</div>
+        <div class="stat-label">Cached Roadmaps</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#E1F5EE;color:#085041"><i class="ti ti-bolt"></i></div>
+      <div class="stat-body">
+        <div class="stat-value">{{ total_hits }}</div>
+        <div class="stat-label">Total Cache Hits</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#FAEEDA;color:#633806"><i class="ti ti-coin"></i></div>
+      <div class="stat-body">
+        <div class="stat-value">{{ ai_calls_saved }}</div>
+        <div class="stat-label">AI Calls Saved</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#FAE7E7;color:#7C1F1F"><i class="ti ti-clock"></i></div>
+      <div class="stat-body">
+        <div class="stat-value">{{ unique_careers }}</div>
+        <div class="stat-label">Unique Careers</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- How it works info bar -->
+  <div class="info-bar">
+    <i class="ti ti-info-circle"></i>
+    <span>
+      <strong>How caching works:</strong>
+      When a student enters a new career, AI generates it once and stores it here.
+      The next student who enters the same career gets the result instantly —
+      <strong>no API call, no waiting.</strong>
+      Each career + level is stored separately.
+    </span>
+  </div>
+
+  <!-- Cache table -->
+  {% if cached_roadmaps %}
+  <div class="cache-table-wrap">
+    <table class="cache-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Career Goal</th>
+          <th>Level</th>
+          <th>Skills</th>
+          <th>Cache Hits</th>
+          <th>AI Calls Saved</th>
+          <th>Cached On</th>
+          <th>Last Used</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in cached_roadmaps %}
+        <tr>
+          <td class="td-num">{{ loop.index }}</td>
+          <td class="td-goal">
+            <div class="goal-name">{{ c.goal }}</div>
+          </td>
+          <td>
+            <span class="badge badge-{{ c.level | lower }}">{{ c.level }}</span>
+          </td>
+          <td class="td-center">{{ c.skill_count }}</td>
+          <td class="td-center">
+            <span class="hit-badge">
+              <i class="ti ti-bolt"></i> {{ c.hit_count }}
+            </span>
+          </td>
+          <td class="td-center">
+            <span class="saved-badge">{{ c.hit_count - 1 }}</span>
+          </td>
+          <td class="td-date">{{ c.created_at.strftime('%d %b %Y') }}</td>
+          <td class="td-date">{{ c.last_used_at.strftime('%d %b %Y') }}</td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <a href="{{ url_for('admin_cache_preview', cache_id=c.id) }}" class="btn-ghost-sm" title="Preview roadmap">
+                <i class="ti ti-eye"></i>
+              </a>
+              <form action="{{ url_for('admin_cache_delete', cache_id=c.id) }}" method="POST"
+                    onsubmit="return confirm('Delete this cached roadmap? Next student will regenerate it via AI.')">
+                <button type="submit" class="btn-danger-sm" title="Delete from cache">
+                  <i class="ti ti-trash"></i>
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% else %}
+  <div class="empty-state" style="margin-top:2rem">
+    <div class="empty-icon">🗄️</div>
+    <div class="empty-title">No cached roadmaps yet</div>
+    <div class="empty-sub">
+      Generate a roadmap for a career that isn't in the manual list
+      (e.g. "Cloud Computing", "AR/VR Developer") and it will appear here automatically.
+    </div>
+    <a href="{{ url_for('generate') }}" class="btn-primary-action" style="margin-top:1rem">
+      <i class="ti ti-sparkles"></i> Generate a Custom Roadmap
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+
+<style>
+  .info-bar {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: var(--accent-light);
+    border: 1px solid #AFA9EC;
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 0.85rem;
+    color: #3C3489;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .info-bar i { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+  .cache-table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .cache-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  .cache-table thead {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .cache-table th {
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .cache-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  .cache-table tbody tr:last-child { border-bottom: none; }
+  .cache-table tbody tr:hover { background: var(--surface2); }
+  .cache-table td { padding: 10px 14px; color: var(--text); vertical-align: middle; }
+
+  .td-num    { color: var(--text-faint); font-size: 0.78rem; width: 36px; }
+  .td-center { text-align: center; }
+  .td-date   { font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; }
+  .td-goal   { font-weight: 500; }
+  .goal-name { color: var(--text); }
+
+  .hit-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    background: var(--accent-light); color: var(--accent-dark);
+    padding: 2px 10px; border-radius: 20px;
+    font-size: 0.78rem; font-weight: 600;
+  }
+  .hit-badge i { font-size: 12px; }
+
+  .saved-badge {
+    display: inline-block;
+    background: var(--teal-light); color: #085041;
+    padding: 2px 10px; border-radius: 20px;
+    font-size: 0.78rem; font-weight: 600;
+  }
+
+  @media (max-width: 768px) {
+    .cache-table-wrap { overflow-x: auto; }
+    .cache-table { min-width: 700px; }
+  }
+</style>
+{% endblock %}

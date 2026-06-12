@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Sign Up — PathForge AI{% endblock %}
+{% block guest_content %}
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-icon">🚀</div>
+      <h1>Create your account</h1>
+      <p>Start building your personalized career roadmap</p>
+    </div>
+
+    <form action="{{ url_for('signup') }}" method="POST" class="auth-form">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <div class="input-wrap">
+          <i class="ti ti-user"></i>
+          <input type="text" id="username" name="username" class="form-control" placeholder="yourname" required autocomplete="username" minlength="3"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email address</label>
+        <div class="input-wrap">
+          <i class="ti ti-mail"></i>
+          <input type="email" id="email" name="email" class="form-control" placeholder="you@example.com" required autocomplete="email"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <i class="ti ti-lock"></i>
+          <input type="password" id="password" name="password" class="form-control" placeholder="Min. 8 characters" required minlength="8" autocomplete="new-password"/>
+          <button type="button" class="eye-btn" onclick="togglePass('password',this)">
+            <i class="ti ti-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="confirm_password">Confirm password</label>
+        <div class="input-wrap">
+          <i class="ti ti-lock-check"></i>
+          <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Repeat your password" required autocomplete="new-password"/>
+          <button type="button" class="eye-btn" onclick="togglePass('confirm_password',this)">
+            <i class="ti ti-eye"></i>
+          </button>
+        </div>
+        <div class="pw-match-hint" id="pw-hint"></div>
+      </div>
+
+      <button type="submit" class="btn-auth" id="signup-btn">Create Account →</button>
+    </form>
+
+    <p class="auth-switch">
+      Already have an account? <a href="{{ url_for('login') }}">Log in</a>
+    </p>
+  </div>
+
+  <div class="auth-visual">
+    <div class="av-content">
+      <div class="av-badge">✦ Free forever</div>
+      <h2>Your personalized<br/>learning engine</h2>
+      <p>Get a step-by-step roadmap tailored to your career goal, level, and available time.</p>
+      <div class="av-features">
+        <div class="av-feature"><i class="ti ti-circle-check"></i> Curated expert roadmaps</div>
+        <div class="av-feature"><i class="ti ti-circle-check"></i> AI for any custom career</div>
+        <div class="av-feature"><i class="ti ti-circle-check"></i> Progress tracking & PDF export</div>
+        <div class="av-feature"><i class="ti ti-circle-check"></i> Beginner · Intermediate · Advanced</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_scripts %}
+<script>
+  // Live password match check
+  const pw  = document.getElementById('password');
+  const cpw = document.getElementById('confirm_password');
+  const hint = document.getElementById('pw-hint');
+  const btn  = document.getElementById('signup-btn');
+
+  function checkMatch() {
+    if (!cpw.value) { hint.textContent = ''; return; }
+    if (pw.value === cpw.value) {
+      hint.textContent = '✓ Passwords match';
+      hint.className = 'pw-match-hint match';
+      btn.disabled = false;
+    } else {
+      hint.textContent = '✗ Passwords do not match';
+      hint.className = 'pw-match-hint no-match';
+      btn.disabled = true;
+    }
+  }
+  pw.addEventListener('input', checkMatch);
+  cpw.addEventListener('input', checkMatch);
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Preview — {{ roadmap.goal }} — PathForge AI{% endblock %}
+{% block content %}
+<div class="page-wrap">
+
+  <div class="page-header">
+    <div>
+      <div class="breadcrumb">
+        <a href="{{ url_for('admin_cache') }}">AI Cache</a>
+        <i class="ti ti-chevron-right"></i>
+        <span>{{ roadmap.goal }}</span>
+      </div>
+      <h1 class="page-title">{{ roadmap.goal }}</h1>
+      <div class="roadmap-meta-row">
+        <span class="badge badge-{{ roadmap.level | lower }}">{{ roadmap.level }}</span>
+        <span class="badge badge-ai">⚡ Cached by AI</span>
+        <span class="meta-chip"><i class="ti ti-bolt"></i> Used {{ hit_count }} times</span>
+        <span class="meta-chip"><i class="ti ti-calendar"></i> Cached {{ cached_on }}</span>
+      </div>
+    </div>
+    <a href="{{ url_for('admin_cache') }}" class="btn-ghost-sm">
+      <i class="ti ti-arrow-left"></i> Back to Cache
+    </a>
+  </div>
+
+  <div class="skills-section">
+    <div class="section-head">
+      <h2 class="section-title">{{ roadmap.skills | length }} Skills in this roadmap</h2>
+    </div>
+    <div class="skills-grid">
+      {% for skill in roadmap.skills %}
+      <div class="skill-card">
+        <div class="sc-header" onclick="toggleSkill({{ loop.index }})">
+          <div class="sc-left">
+            <div class="sc-info">
+              <div class="sc-name">{{ skill.name }}</div>
+              <div class="sc-meta">{{ skill.duration }} · {{ skill.topics | length }} topics</div>
+            </div>
+          </div>
+          <i class="ti ti-chevron-down sc-chevron" id="chev-{{ loop.index }}"></i>
+        </div>
+        <div class="sc-body" id="body-{{ loop.index }}" style="display:none">
+          <div class="sc-section-label">📚 Topics</div>
+          <div class="sc-topics">
+            {% for topic in skill.topics %}
+            <span class="topic-chip">{{ topic }}</span>
+            {% endfor %}
+          </div>
+          {% if skill.tasks %}
+          <div class="sc-section-label" style="margin-top:10px">✅ Tasks</div>
+          <ul class="sc-tasks">
+            {% for task in skill.tasks %}
+            <li><i class="ti ti-arrow-right"></i> {{ task }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+          {% if skill.resources %}
+          <div class="sc-section-label" style="margin-top:10px">🔗 Resources</div>
+          <div class="sc-resources">
+            {% for res in skill.resources %}
+            <a href="{{ res.url }}" target="_blank" class="resource-link">
+              <i class="ti ti-external-link"></i> {{ res.title }}
+            </a>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% block extra_scripts %}
+<script>
+function toggleSkill(idx) {
+  const body = document.getElementById('body-' + idx);
+  const chev = document.getElementById('chev-' + idx);
+  const open = body.style.display === 'block';
+  body.style.display = open ? 'none' : 'block';
+  chev.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+</script>
+{% endblock %}
+{% endblock %}
