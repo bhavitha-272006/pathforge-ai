@@ -3,7 +3,7 @@ services:
     name: pathforge-ai
     env: python
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn app:app"
+    startCommand: "gunicorn app:app --timeout 60"
     envVars:
       - key: SECRET_KEY
         sync: false

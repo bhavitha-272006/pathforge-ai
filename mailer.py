@@ -159,7 +159,7 @@ def send_roadmap_email(to_email: str, username: str, roadmap: dict, pdf_bytes: b
 
     # ── Send via Gmail SMTP ──
     try:
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=10) as server:
             server.ehlo()
             server.starttls()
             server.login(sender_email, sender_password)
@@ -175,7 +175,8 @@ def send_roadmap_email(to_email: str, username: str, roadmap: dict, pdf_bytes: b
                 "Get one at: https://myaccount.google.com/apppasswords"
             )
         }
-    except smtplib.SMTPException as e:
+    except (smtplib.SMTPException, TimeoutError, OSError) as e:
+        print(f"[Mailer] SMTP failed/timed out: {e}")
         return {"success": False, "error": f"SMTP error: {e}"}
     except Exception as e:
         return {"success": False, "error": str(e)}
