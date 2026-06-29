@@ -12,7 +12,13 @@ load_dotenv()   # reads SECRET_KEY and GROQ_API_KEY from your .env file
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
+
+# ── Database — PostgreSQL on Render, SQLite locally ──
+DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///database.db")
+# Render gives postgres:// but SQLAlchemy needs postgresql://
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)

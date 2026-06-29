@@ -6,3 +6,4 @@ reportlab
 groq
 python-dotenv
 gunicorn
+psycopg2-binary
