@@ -20,6 +20,7 @@ if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SESSION_PERMANENT"] = False  # session expires when browser closes
 
 db.init_app(app)
 
@@ -93,7 +94,7 @@ def login():
         password = request.form.get("password", "")
         user = User.query.filter_by(email=email).first()
         if user and check_password_hash(user.password, password):
-            login_user(user, remember=True)
+            login_user(user)
             flash(f"Welcome back, {user.username}!", "success")
             return redirect(url_for("dashboard"))
         flash("Invalid email or password.", "error")
