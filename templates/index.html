@@ -1,44 +1,399 @@
 {% extends "base.html" %}
 {% block title %}PathForge AI — Build Your Career Roadmap{% endblock %}
 {% block guest_content %}
+
+<style>
+/* ── Hero ── */
+.hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 5rem 2rem 3rem;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accent-light); color: var(--accent-dark);
+  padding: 5px 14px; border-radius: 20px;
+  font-size: 0.78rem; font-weight: 600; margin-bottom: 1.2rem;
+}
+.hero-badge i { font-size: 14px; }
+.hero-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 2.8rem; font-weight: 800;
+  line-height: 1.15; letter-spacing: -1px;
+  color: var(--text); margin-bottom: 1rem;
+}
+.hero-accent { color: var(--accent); }
+.hero-sub {
+  font-size: 1rem; color: var(--text-muted);
+  line-height: 1.7; margin-bottom: 2rem; max-width: 440px;
+}
+.hero-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-hero-primary {
+  padding: 12px 24px; background: var(--accent); color: white;
+  border-radius: var(--radius-sm); font-size: 0.95rem; font-weight: 700;
+  text-decoration: none; transition: background 0.15s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-hero-primary:hover { background: var(--accent-dark); color: white; text-decoration: none; }
+.btn-hero-ghost {
+  padding: 12px 20px; background: none;
+  border: 1px solid var(--border); color: var(--text-muted);
+  border-radius: var(--radius-sm); font-size: 0.95rem;
+  text-decoration: none; transition: all 0.15s;
+}
+.btn-hero-ghost:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+
+/* ── AI Prompt box ── */
+.ai-prompt-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+}
+.apb-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 14px;
+}
+.apb-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--accent); animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
+}
+.apb-label { font-size: 0.78rem; font-weight: 600; color: var(--accent-dark); }
+
+.apb-input-row {
+  display: flex; gap: 8px; align-items: center;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 14px; margin-bottom: 12px;
+}
+.apb-input-row i { font-size: 18px; color: var(--accent); flex-shrink: 0; }
+.apb-input-text { font-size: 0.9rem; color: var(--text-muted); flex: 1; }
+.apb-cursor {
+  width: 2px; height: 16px; background: var(--accent);
+  animation: blink 1s infinite;
+}
+@keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0; } }
+
+.apb-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.apb-chip {
+  padding: 4px 12px; border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  font-size: 0.75rem; color: var(--text-muted);
+}
+.apb-chip.active {
+  background: var(--accent-light); border-color: var(--accent);
+  color: var(--accent-dark); font-weight: 500;
+}
+
+.apb-result {
+  background: var(--accent-light);
+  border: 1px solid #AFA9EC;
+  border-radius: 10px; padding: 12px 14px;
+}
+.apb-result-label {
+  font-size: 0.7rem; font-weight: 600; color: var(--accent-dark);
+  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+}
+.apb-skills { display: flex; flex-direction: column; gap: 6px; }
+.apb-skill {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px;
+}
+.apb-skill-name { font-size: 0.8rem; color: var(--accent-dark); font-weight: 500; min-width: 130px; }
+.apb-bar-track { flex: 1; background: rgba(127,119,221,0.2); border-radius: 20px; height: 5px; }
+.apb-bar-fill  { height: 100%; border-radius: 20px; background: var(--accent); }
+.apb-skill-dur { font-size: 0.7rem; color: var(--accent-dark); min-width: 50px; text-align: right; }
+
+/* ── Feature cards ── */
+.features-section {
+  max-width: 1100px; margin: 0 auto;
+  padding: 2rem 2rem 4rem;
+}
+.features-title {
+  text-align: center;
+  font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800;
+  color: var(--text); margin-bottom: 0.5rem;
+}
+.features-sub {
+  text-align: center; font-size: 0.95rem; color: var(--text-muted);
+  margin-bottom: 2rem;
+}
+.features-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  margin-bottom: 3rem;
+}
+.feat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.feat-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+.feat-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; margin-bottom: 12px;
+}
+.feat-title { font-size: 0.95rem; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+.feat-desc  { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+
+/* ── How it works ── */
+.how-section {
+  background: var(--surface2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 3rem 2rem;
+}
+.how-inner { max-width: 900px; margin: 0 auto; }
+.how-title {
+  text-align: center;
+  font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800;
+  color: var(--text); margin-bottom: 2rem;
+}
+.how-steps { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+.how-step { text-align: center; }
+.how-num {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--accent); color: white;
+  font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 10px;
+}
+.how-step-title { font-size: 0.875rem; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.how-step-desc  { font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; }
+
+/* ── Levels ── */
+.levels-section {
+  text-align: center; padding: 4rem 2rem;
+  max-width: 1100px; margin: 0 auto;
+}
+.levels-section h2 {
+  font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800;
+  color: var(--text); margin-bottom: 0.5rem;
+}
+.levels-sub { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 2rem; }
+.levels-grid {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 16px; max-width: 760px; margin: 0 auto;
+}
+.level-preview {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.lp-featured {
+  border-color: var(--accent);
+  box-shadow: 0 4px 16px rgba(127,119,221,0.2);
+  transform: scale(1.03);
+}
+.lp-icon { font-size: 2rem; margin-bottom: 8px; }
+.lp-name { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.lp-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 10px; }
+.lp-tag { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+.tag-green  { background: var(--teal-light);  color: #085041; }
+.tag-purple { background: var(--accent-light); color: var(--accent-dark); }
+.tag-coral  { background: var(--coral-light);  color: #712B13; }
+
+/* ── CTA banner ── */
+.cta-section {
+  background: linear-gradient(135deg, var(--accent-dark) 0%, #7F77DD 100%);
+  padding: 4rem 2rem; text-align: center;
+}
+.cta-title {
+  font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800;
+  color: white; margin-bottom: 0.8rem;
+}
+.cta-sub { font-size: 1rem; color: rgba(255,255,255,0.8); margin-bottom: 2rem; }
+.btn-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: white; color: var(--accent-dark);
+  padding: 14px 28px; border-radius: var(--radius-sm);
+  font-size: 1rem; font-weight: 700; text-decoration: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); color: var(--accent-dark); text-decoration: none; }
+
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; gap: 2rem; padding: 3rem 1.5rem 2rem; }
+  .hero-title { font-size: 2rem; }
+  .features-grid { grid-template-columns: 1fr 1fr; }
+  .how-steps { grid-template-columns: 1fr 1fr; gap: 20px; }
+  .levels-grid { grid-template-columns: 1fr; }
+  .lp-featured { transform: none; }
+}
+@media (max-width: 600px) {
+  .features-grid { grid-template-columns: 1fr; }
+  .how-steps { grid-template-columns: 1fr 1fr; }
+}
+</style>
+
+<!-- ── HERO ── -->
 <section class="hero">
   <div class="hero-inner">
-    <div class="hero-badge">✦ Hybrid AI Engine — Always Free</div>
-    <h1 class="hero-title">Build Your Personalized<br/><span class="hero-accent">Career Roadmap</span></h1>
+    <div class="hero-badge">
+      <i class="ti ti-sparkles"></i> Powered by Llama 3.1 AI
+    </div>
+    <h1 class="hero-title">
+      Your Career Roadmap,<br/>
+      <span class="hero-accent">Generated by AI</span>
+    </h1>
     <p class="hero-sub">
-      10 curated expert roadmaps + AI generation for any other career.
-      Track your skills, stay consistent, reach your goal.
+      Tell us your career goal and level — our AI instantly builds a
+      personalized step-by-step learning plan with skills, tasks, and
+      free resources. Track progress and receive it in your inbox.
     </p>
     <div class="hero-actions">
-      <a href="{{ url_for('signup') }}" class="btn-hero-primary">Get Started Free →</a>
+      <a href="{{ url_for('signup') }}" class="btn-hero-primary">
+        <i class="ti ti-sparkles"></i> Generate My Roadmap Free
+      </a>
       <a href="{{ url_for('login') }}" class="btn-hero-ghost">I have an account</a>
     </div>
   </div>
 
-  <div class="hero-cards">
-    <div class="hero-card hc-1">
-      <div class="hc-icon">🎯</div>
-      <div class="hc-title">10 Curated Careers</div>
-      <div class="hc-sub">Expert-designed skill trees for the most popular paths</div>
+  <!-- AI prompt mockup -->
+  <div class="ai-prompt-box">
+    <div class="apb-header">
+      <div class="apb-dot"></div>
+      <div class="apb-label">✦ PathForge AI — Generating roadmap...</div>
     </div>
-    <div class="hero-card hc-2">
-      <div class="hc-icon">✦</div>
-      <div class="hc-title">AI for Any Career</div>
-      <div class="hc-sub">Type anything — Groq AI generates a roadmap instantly</div>
+
+    <div class="apb-input-row">
+      <i class="ti ti-brain"></i>
+      <span class="apb-input-text">AI Engineer, Beginner, 3 months</span>
+      <div class="apb-cursor"></div>
     </div>
-    <div class="hero-card hc-3">
-      <div class="hc-icon">📈</div>
-      <div class="hc-title">Track Progress</div>
-      <div class="hc-sub">Checkboxes, progress bars and dashboard analytics</div>
+
+    <div class="apb-chips">
+      <span class="apb-chip active">AI Engineer</span>
+      <span class="apb-chip">Data Scientist</span>
+      <span class="apb-chip">Cloud Engineer</span>
+      <span class="apb-chip">UI/UX Designer</span>
+      <span class="apb-chip">+ any career</span>
     </div>
-    <div class="hero-card hc-4">
-      <div class="hc-icon">📄</div>
-      <div class="hc-title">PDF Export</div>
-      <div class="hc-sub">Download your roadmap as a clean, shareable PDF</div>
+
+    <div class="apb-result">
+      <div class="apb-result-label">✦ AI Generated Roadmap — 6 skills</div>
+      <div class="apb-skills">
+        <div class="apb-skill">
+          <span class="apb-skill-name">Python Fundamentals</span>
+          <div class="apb-bar-track"><div class="apb-bar-fill" style="width:100%"></div></div>
+          <span class="apb-skill-dur">2 weeks</span>
+        </div>
+        <div class="apb-skill">
+          <span class="apb-skill-name">Math & Statistics</span>
+          <div class="apb-bar-track"><div class="apb-bar-fill" style="width:85%"></div></div>
+          <span class="apb-skill-dur">2 weeks</span>
+        </div>
+        <div class="apb-skill">
+          <span class="apb-skill-name">Machine Learning</span>
+          <div class="apb-bar-track"><div class="apb-bar-fill" style="width:60%"></div></div>
+          <span class="apb-skill-dur">3 weeks</span>
+        </div>
+        <div class="apb-skill">
+          <span class="apb-skill-name">Deep Learning</span>
+          <div class="apb-bar-track"><div class="apb-bar-fill" style="width:30%"></div></div>
+          <span class="apb-skill-dur">3 weeks</span>
+        </div>
+        <div class="apb-skill">
+          <span class="apb-skill-name">Model Deployment</span>
+          <div class="apb-bar-track"><div class="apb-bar-fill" style="width:10%"></div></div>
+          <span class="apb-skill-dur">2 weeks</span>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
+<!-- ── FEATURES ── -->
+<section class="features-section">
+  <h2 class="features-title">Everything you need to reach your goal</h2>
+  <p class="features-sub">AI generates your roadmap. You just have to follow it.</p>
+
+  <div class="features-grid">
+    <div class="feat-card">
+      <div class="feat-icon" style="background:var(--accent-light);color:var(--accent-dark)">
+        <i class="ti ti-brain"></i>
+      </div>
+      <div class="feat-title">AI Roadmap Generation</div>
+      <div class="feat-desc">Enter any career goal — our AI instantly creates a complete personalized learning path with skills, topics, tasks and resources.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon" style="background:var(--teal-light);color:#085041">
+        <i class="ti ti-chart-bar"></i>
+      </div>
+      <div class="feat-title">Progress Tracking</div>
+      <div class="feat-desc">Check off skills as you complete them. Your progress is saved automatically and synced across all your devices.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon" style="background:var(--amber-light);color:#633806">
+        <i class="ti ti-message-circle"></i>
+      </div>
+      <div class="feat-title">AI Career Assistant</div>
+      <div class="feat-desc">Chat with our AI that knows your roadmap and progress. Ask anything — it gives personalized answers based on where you are.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon" style="background:var(--coral-light);color:#712B13">
+        <i class="ti ti-file-download"></i>
+      </div>
+      <div class="feat-title">PDF Export & Email</div>
+      <div class="feat-desc">Download your roadmap as a professional PDF. It's also automatically emailed to your inbox the moment it's generated.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon" style="background:var(--accent-light);color:var(--accent-dark)">
+        <i class="ti ti-history"></i>
+      </div>
+      <div class="feat-title">Roadmap History</div>
+      <div class="feat-desc">All your generated roadmaps are saved. Resume, review, or switch between multiple career paths anytime.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon" style="background:var(--teal-light);color:#085041">
+        <i class="ti ti-moon"></i>
+      </div>
+      <div class="feat-title">Dark Mode & Mobile</div>
+      <div class="feat-desc">Fully responsive design that works on mobile, tablet and desktop. Includes dark mode that remembers your preference.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section class="how-section">
+  <div class="how-inner">
+    <h2 class="how-title">How it works</h2>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-num">1</div>
+        <div class="how-step-title">Enter your goal</div>
+        <div class="how-step-desc">Type any tech career — Frontend, AI Engineer, Cloud, UX Designer, or anything else</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">2</div>
+        <div class="how-step-title">AI generates instantly</div>
+        <div class="how-step-desc">Our AI builds a personalized roadmap with skills, topics, tasks and free learning resources</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">3</div>
+        <div class="how-step-title">Track your progress</div>
+        <div class="how-step-desc">Check off skills as you complete them and watch your progress grow skill by skill</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">4</div>
+        <div class="how-step-title">Receive in email</div>
+        <div class="how-step-desc">Get your roadmap as a PDF in your inbox automatically — study it even offline</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── LEVELS ── -->
 <section class="levels-section">
   <h2>Three levels for every student</h2>
   <p class="levels-sub">Whether you're just starting or already building projects — there's a level for you.</p>
@@ -47,23 +402,30 @@
       <div class="lp-icon">🌱</div>
       <div class="lp-name">Beginner</div>
       <div class="lp-desc">Start from zero. Clear steps, free resources, beginner-friendly tasks.</div>
-      <div class="lp-tag tag-green">Perfect for students</div>
+      <div class="lp-tag tag-green">Perfect to start</div>
     </div>
     <div class="level-preview lp-featured">
       <div class="lp-icon">🚀</div>
       <div class="lp-name">Intermediate</div>
-      <div class="lp-desc">You know the basics. Build real projects and go deeper into the stack.</div>
+      <div class="lp-desc">You know the basics. Build real projects and go deeper.</div>
       <div class="lp-tag tag-purple">Most popular</div>
     </div>
     <div class="level-preview">
       <div class="lp-icon">⚡</div>
       <div class="lp-name">Advanced</div>
-      <div class="lp-desc">Architecture, systems design, research, and expert-level skills.</div>
+      <div class="lp-desc">Architecture, systems design, and expert-level mastery.</div>
       <div class="lp-tag tag-coral">Expert path</div>
     </div>
   </div>
-  <div style="text-align:center;margin-top:2rem">
-    <a href="{{ url_for('signup') }}" class="btn-hero-primary">Start Building Your Roadmap →</a>
-  </div>
 </section>
+
+<!-- ── CTA ── -->
+<section class="cta-section">
+  <div class="cta-title">Ready to build your career?</div>
+  <div class="cta-sub">Join students who are learning smarter with AI-generated roadmaps.</div>
+  <a href="{{ url_for('signup') }}" class="btn-cta">
+    <i class="ti ti-sparkles"></i> Generate My Roadmap — It's Free
+  </a>
+</section>
+
 {% endblock %}

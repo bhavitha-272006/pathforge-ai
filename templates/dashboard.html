@@ -68,7 +68,7 @@
           </div>
           <div class="active-badges">
             <span class="badge badge-{{ active_roadmap.level | lower }}">{{ active_roadmap.level }}</span>
-            {% if active_roadmap.source == 'ai' %}
+            {% if active_roadmap.source in ['ai', 'ai_cached'] %}
               <span class="badge badge-ai">✦ AI</span>
             {% else %}
               <span class="badge badge-manual">Curated</span>
@@ -77,20 +77,13 @@
         </div>
 
         <!-- Progress bar -->
-        {% set prog = namespace(done=0, total=0) %}
-        {% for p in active_roadmap.progress %}
-          {% set prog.total = prog.total + 1 %}
-          {% if p.completed %}{% set prog.done = prog.done + 1 %}{% endif %}
-        {% endfor %}
-        {% set pct = ((prog.done / prog.total * 100) | round | int) if prog.total > 0 else 0 %}
-
         <div class="prog-label">
-          <span>Progress</span><span>{{ prog.done }} / {{ prog.total }} skills</span>
+          <span>Progress</span><span>{{ active_done }} / {{ active_total }} skills</span>
         </div>
         <div class="prog-track">
-          <div class="prog-fill" style="width:{{ pct }}%"></div>
+          <div class="prog-fill" style="width:{{ active_pct }}%"></div>
         </div>
-        <div class="prog-pct">{{ pct }}%</div>
+        <div class="prog-pct">{{ active_pct }}%</div>
 
         <div class="active-actions">
           <a href="{{ url_for('roadmap', roadmap_id=active_roadmap.id) }}" class="btn-resume">

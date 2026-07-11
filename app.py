@@ -40,6 +40,8 @@ with app.app_context():
 # ── HOME ────────────────────────────────────
 @app.route("/")
 def index():
+    if current_user.is_authenticated:
+        return redirect(url_for("dashboard"))
     return render_template("index.html")
 
 
@@ -124,6 +126,19 @@ def dashboard():
     completed_skills = sum(1 for p in all_progress if p.completed)
     overall_pct      = round((completed_skills / total_skills * 100) if total_skills else 0)
 
+    # Active roadmap progress
+    active_done  = 0
+    active_total = 0
+    active_pct   = 0
+    if active_roadmap:
+        active_progress = Progress.query.filter_by(
+            user_id=current_user.id,
+            roadmap_id=active_roadmap.id
+        ).all()
+        active_total = len(active_progress)
+        active_done  = sum(1 for p in active_progress if p.completed)
+        active_pct   = round((active_done / active_total * 100) if active_total else 0)
+
     return render_template(
         "dashboard.html",
         history=history,
@@ -132,6 +147,9 @@ def dashboard():
         total_skills=total_skills,
         completed_skills=completed_skills,
         overall_pct=overall_pct,
+        active_done=active_done,
+        active_total=active_total,
+        active_pct=active_pct,
     )
 
 

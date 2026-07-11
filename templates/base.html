@@ -139,8 +139,11 @@
 
   <!-- Toggle button -->
   <button class="float-chat-btn" id="chat-toggle" onclick="toggleChat()" title="Ask AI Assistant">
-    <i class="ti ti-message-circle" id="chat-btn-icon"></i>
-    <span class="chat-btn-label">Ask AI</span>
+    <span class="chat-btn-inner">
+      <span class="chat-btn-robot" id="chat-btn-icon">🤖</span>
+      <span class="chat-btn-label">Ask AI</span>
+    </span>
+    <span class="chat-btn-ping"></span>
   </button>
 
   <!-- Chat window -->
@@ -199,22 +202,54 @@
 
   /* ── Toggle button ── */
   .float-chat-btn {
-    display: flex; align-items: center; gap: 7px;
+    display: flex; align-items: center;
     background: var(--accent);
     color: white;
     border: none;
-    padding: 11px 20px;
+    padding: 0;
     border-radius: 30px;
-    font-size: 0.875rem;
-    font-weight: 600;
     cursor: pointer;
     box-shadow: 0 4px 20px rgba(127,119,221,0.5);
     transition: all 0.2s;
     font-family: inherit;
+    position: relative;
+    overflow: visible;
   }
   .float-chat-btn:hover { background: var(--accent-dark); transform: translateY(-2px); box-shadow: 0 6px 24px rgba(127,119,221,0.6); }
-  .float-chat-btn i { font-size: 18px; }
-  .chat-btn-label { font-size: 0.85rem; }
+
+  .chat-btn-inner {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 18px;
+  }
+  .chat-btn-robot {
+    font-size: 20px; line-height: 1;
+    transition: transform 0.3s;
+  }
+  .float-chat-btn:hover .chat-btn-robot { transform: rotate(-10deg) scale(1.2); }
+  .chat-btn-label { font-size: 0.875rem; font-weight: 600; color: white; }
+
+  /* Ping animation dot */
+  .chat-btn-ping {
+    position: absolute;
+    top: -3px; right: -3px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: #1D9E75;
+    border: 2px solid var(--bg);
+  }
+  .chat-btn-ping::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: #1D9E75;
+    opacity: 0.5;
+    animation: chatPing 1.5s infinite;
+  }
+  @keyframes chatPing {
+    0%   { transform: scale(1);   opacity: 0.5; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
 
   /* ── Chat window ── */
   .float-chat-window {
@@ -372,7 +407,8 @@
     .float-chat-window { width: calc(100vw - 32px); }
     .float-chat { bottom: 12px; right: 12px; }
     .chat-btn-label { display: none; }
-    .float-chat-btn { padding: 11px 13px; border-radius: 50%; }
+    .chat-btn-inner { padding: 11px 13px; }
+    .float-chat-btn { border-radius: 50%; }
   }
 </style>
 
@@ -386,7 +422,10 @@
     fcwOpen = !fcwOpen;
     win.style.display = fcwOpen ? 'flex' : 'none';
     if (fcwOpen) win.style.flexDirection = 'column';
-    icon.className = fcwOpen ? 'ti ti-x' : 'ti ti-message-circle';
+    icon.textContent = fcwOpen ? '✕' : '🤖';
+    // hide ping when open
+    const ping = document.querySelector('.chat-btn-ping');
+    if (ping) ping.style.display = fcwOpen ? 'none' : 'block';
     if (fcwOpen) {
       document.getElementById('fcw-input').focus();
       fcwScrollBottom();
