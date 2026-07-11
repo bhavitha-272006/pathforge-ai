@@ -26,7 +26,7 @@ AI-Powered Personalized Career Roadmap Generator — built with Flask, Groq AI (
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/YOUR_USERNAME/pathforge-ai.git
+git clone https://github.com/bhavitha-272006/pathforge-ai
 cd pathforge-ai
 ```
 
