@@ -43,9 +43,6 @@
       </a>
 
       <div class="nav-label" style="margin-top:8px">Tools</div>
-      <a href="{{ url_for('admin_cache') }}" class="nav-item {% if request.endpoint in ['admin_cache','admin_cache_preview'] %}active{% endif %}">
-        <i class="ti ti-database"></i> AI Cache
-      </a>
       <a href="{{ url_for('logout') }}" class="nav-item">
         <i class="ti ti-logout"></i> Logout
       </a>
