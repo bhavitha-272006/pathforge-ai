@@ -431,69 +431,6 @@ def send_email(roadmap_id):
     return redirect(url_for("roadmap", roadmap_id=roadmap_id))
 
 
-# ── ADMIN: CACHE VIEWER ─────────────────────
-@app.route("/admin/cache")
-@login_required
-def admin_cache():
-    from models import CachedRoadmap
-    entries = CachedRoadmap.query.order_by(CachedRoadmap.hit_count.desc()).all()
-
-    enriched = []
-    for c in entries:
-        data = json.loads(c.roadmap_json)
-        enriched.append({
-            "id":          c.id,
-            "goal":        c.goal,
-            "level":       c.level,
-            "hit_count":   c.hit_count,
-            "skill_count": len(data.get("skills", [])),
-            "created_at":  c.created_at,
-            "last_used_at":c.last_used_at,
-        })
-
-    total_hits     = sum(c.hit_count for c in entries)
-    ai_calls_saved = sum(c.hit_count - 1 for c in entries)
-    unique_careers = len(set(c.goal.lower() for c in entries))
-
-    return render_template(
-        "admin.html",
-        cached_roadmaps=enriched,
-        total_cached=len(entries),
-        total_hits=total_hits,
-        ai_calls_saved=ai_calls_saved,
-        unique_careers=unique_careers,
-    )
-
-
-@app.route("/admin/cache/preview/<int:cache_id>")
-@login_required
-def admin_cache_preview(cache_id):
-    from models import CachedRoadmap
-    entry = db.session.get(CachedRoadmap, cache_id)
-    if not entry:
-        flash("Cached roadmap not found.", "error")
-        return redirect(url_for("admin_cache"))
-    roadmap = json.loads(entry.roadmap_json)
-    return render_template(
-        "admin_preview.html",
-        roadmap=roadmap,
-        hit_count=entry.hit_count,
-        cached_on=entry.created_at.strftime("%d %b %Y"),
-    )
-
-
-@app.route("/admin/cache/delete/<int:cache_id>", methods=["POST"])
-@login_required
-def admin_cache_delete(cache_id):
-    from models import CachedRoadmap
-    entry = db.session.get(CachedRoadmap, cache_id)
-    if entry:
-        db.session.delete(entry)
-        db.session.commit()
-        flash(f"Deleted cached roadmap: {entry.goal} ({entry.level})", "info")
-    return redirect(url_for("admin_cache"))
-
-
 # ── PDF EXPORT ──────────────────────────────
 @app.route("/download_pdf/<int:roadmap_id>")
 @login_required
