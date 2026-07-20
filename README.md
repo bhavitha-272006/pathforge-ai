@@ -4,7 +4,6 @@ AI-Powered Personalized Career Roadmap Generator — built with Flask, Groq AI (
 
 ## Features
 
-- 🎯 10 curated career roadmaps × 3 levels (30 total)
 - 🤖 AI-generated roadmaps for any custom career (Groq + Llama 3.1)
 - ⚡ Smart caching — AI called once per career, reused forever
 - 📊 Progress tracking with real-time percentage
